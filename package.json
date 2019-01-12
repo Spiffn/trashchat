@@ -1,0 +1,23 @@
+{
+  "name": "trashchat",
+  "version": "1.0.0",
+  "description": "basic chat",
+  "main": "server.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node server.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/tonkatsu-soba/trashchat.git"
+  },
+  "author": "Lawrence Niu",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/tonkatsu-soba/trashchat/issues"
+  },
+  "homepage": "https://github.com/tonkatsu-soba/trashchat#readme",
+  "dependencies": {
+    "ws": "^6.1.2"
+  }
+}
