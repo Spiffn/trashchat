@@ -18,7 +18,7 @@ On push:
 3) Clients process and display as posts.
 
 usage:
-node server.js
+`node server.js`
 
 will serve localhost:8081 using websocket ws://localhost:8888/request (and only /request)
 
