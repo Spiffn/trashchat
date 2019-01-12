@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html class="h-100" lang="en">
+  <head>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.2.1/css/bootstrap.min.css" integrity="sha384-GJzZqFGwb1QTTN6wy59ffF1BuGJpLSa9DkKMp0DgiMDm4iYMj70gZWKYbI706tWS" crossorigin="anonymous">
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.2.1/js/bootstrap.min.js" integrity="sha384-B0UglyR+jN6CkvvICOB2joaf5I4l3gm9GU6Hc1og6Ls7i6U/mkkaduKaBhlAXv9k" crossorigin="anonymous"></script>
+    <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js" integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo" crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.6/umd/popper.min.js" integrity="sha384-wHAiFfRlMFy6i5SRaxvfOCifBUQy1xHdJ/yoi7FRNXMRBu5WHdZYu1hA6ZOblgut" crossorigin="anonymous"></script>
+
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <title>TrashChat</title>
+  </head>
+
+  <body class="d-flex flex-column h-100">
+    <main class="flex-shrink-0" role="main">
+      <div class="container-fluid">
+        <div class="row">
+          <div class="col" id="textbody">
+            <!-- add to <p> text body -->
+          </div>
+          <div class="col-sm-4">
+            <div class="card">
+              <div class="card-header">Users</div>
+              <!-- Adding to User: add a <li> 
+                    segment of class="list-group-item" with body -->
+              <ul class="list-group list-group-flush" id="userlist">
+                <!--<li class="list-group-item">testuser</li>-->
+              </ul>
+            </div>
+          </div>
+        </div>
+      </div>
+    </main>
+    <footer class="footer mt-auto">
+      <div class="container-fluid">
+        <div class="row no-gutters">
+          <div class="col">
+            <div class="input-group">
+              <div class="input-group-prepend">
+                <span class="input-group-text" id="user-id"></span>
+              </div>
+              <input type="text" class="form-control" id="textbox"></input>
+            </div>
+          </div>
+          <div class="col-sm-2">
+            <button type="button" class="btn btn-primary" id="btn_submit">Submit</button>
+          </div>
+        </div>
+      </div>
+    </footer>
+
+    <script>
+      const server_command = {
+        NEW_POST: 0,
+        NEW_USER: 1,
+        DEL_USER: 2,
+        USERLIST: 3
+      };
+
+      const client_command = {
+        PUSH_POST: 0
+      };
+
+      // websocket connect and events
+      var ws = new WebSocket('ws://localhost:8888/requests');
+      ws.onmessage = function(pack) {
+        console.log(pack);
+        let packet = JSON.parse(pack.data);
+        switch (packet.command) {
+          case server_command.NEW_POST:
+            $('#textbody').append('<p>' + packet.payload + '</p>');
+            break;
+          case server_command.NEW_USER:
+            $('#userlist').append(
+              '<li class="list-group-item">' + packet.payload + '</li>');
+            break;
+          case server_command.DEL_USER:
+            $('#userlist > li').remove(":contains('" + packet.payload + "')");
+            break;
+          case server_command.USERLIST:
+            $('#userlist > li').remove();
+            packet.payload.list.forEach(function each(usr) {
+              $('#userlist').append(
+                '<li class="list-group-item">' + usr + '</li>');
+            });
+            $('#user-id').text(packet.payload.name);
+            break;
+        }
+
+        //textbox handles
+        $('#btn_submit').click(function() {
+          let textbody = $('#textbox').val();
+          if (textbody !== '') {
+            console.log('sent');
+            ws.send(JSON.stringify({
+              command: client_command.PUSH_POST,
+              payload: textbody
+            }));
+            $('#textbox').val('');
+          }
+        });
+
+        $('#textbox').keypress(function (e) {
+          if (e.which === 13) { // enter key
+            $('#btn_submit').click();
+            return false;
+          }
+        });
+      };
+    </script>
+  </body>
+</html>
